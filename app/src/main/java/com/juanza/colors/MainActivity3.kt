@@ -9,6 +9,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.AlignmentLine
@@ -19,6 +20,7 @@ import androidx.compose.ui.unit.Dp
 
 
 class MainActivity3 : ComponentActivity() {
+    private var colorsGame: ColorsGame? = null
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent{
@@ -29,6 +31,14 @@ class MainActivity3 : ComponentActivity() {
     @Composable
     fun myUI() {
 
+        var sliderRed by remember {mutableStateOf(128f)}
+        var sliderGreen by remember {mutableStateOf(128f)}
+        var sliderBlue by remember {mutableStateOf(128f)}
+        var randomColor by remember {
+            mutableStateOf(Color.White)
+        }
+        var targetBackColor by remember { mutableStateOf(Color(0xFF808080)) }
+        var proposedBackColor by remember { mutableStateOf(Color(0xFF6699CC)) }
 
         Column(
             modifier = Modifier.padding(Dp(10f))
@@ -37,11 +47,32 @@ class MainActivity3 : ComponentActivity() {
             Row(
                 modifier = Modifier.weight(2f)
             ) {
-                colorSection()
+                colorSection(targetBackColor, proposedBackColor)
             }
-            sliderSection(title = stringResource(R.string.Red), color = Color.Red, value = 30f )
-            sliderSection(title = stringResource(R.string.Green), color = Color.Green, value = 90f )
-            sliderSection(title = stringResource(R.string.Blue), color = Color.Blue, value = 180f )
+            sliderSection(title = stringResource(R.string.Red),
+                color = Color.Red,
+                value = sliderRed,
+                onValueChange = {newValue ->
+                    sliderRed = newValue
+                    proposedBackColor = Color(sliderRed.toInt(),sliderGreen.toInt(),sliderBlue.toInt())
+                }
+            )
+            sliderSection(title = stringResource(R.string.Green),
+                color = Color.Green,
+                value = sliderGreen,
+                onValueChange = {newValue ->
+                    sliderGreen = newValue
+                    proposedBackColor = Color(sliderRed.toInt(),sliderGreen.toInt(),sliderBlue.toInt())
+                }
+            )
+            sliderSection(title = stringResource(R.string.Blue),
+                color = Color.Blue,
+                value = sliderBlue,
+                onValueChange = {newValue ->
+                    sliderBlue = newValue
+                    proposedBackColor = Color(sliderRed.toInt(),sliderGreen.toInt(),sliderBlue.toInt())
+                }
+            )
             buttonSection()
 
         }
@@ -60,7 +91,10 @@ class MainActivity3 : ComponentActivity() {
                 Button(
                     onClick = { /*TODO*/ },
                     modifier = Modifier
-                        .fillMaxWidth()
+                        .fillMaxWidth(),
+                    colors = ButtonDefaults.buttonColors(
+                        backgroundColor = Color(166, 223, 158)
+                    )
                 ){
                     Text(text = stringResource(R.string.New))
                 }
@@ -69,7 +103,10 @@ class MainActivity3 : ComponentActivity() {
             ){
                 Button(onClick = { /*TODO*/ },
                     modifier = Modifier
-                        .fillMaxWidth()
+                        .fillMaxWidth(),
+                    colors = ButtonDefaults.buttonColors(
+                        backgroundColor = Color(157, 180, 222)
+                    )
                 ){
                     Text(text = stringResource(R.string.Score))
                 }
@@ -80,7 +117,8 @@ class MainActivity3 : ComponentActivity() {
 
     @Composable
     fun colorSection(
-
+        targetColor: Color,
+        proposedColor: Color
     ){
         Row(
             modifier = Modifier
@@ -89,7 +127,7 @@ class MainActivity3 : ComponentActivity() {
 
             Column(
                 modifier = Modifier
-                    .background(Color(0xFF6699CC))
+                    .background(proposedColor)
                     .fillMaxHeight()
                     .padding(Dp(16f))
                     .weight(1f)
@@ -103,7 +141,7 @@ class MainActivity3 : ComponentActivity() {
             }
             Column(
                 modifier = Modifier
-                    .background(Color(0xFF808080))
+                    .background(targetColor)
                     .fillMaxHeight()
                     .padding(Dp(16f))
                     .weight(1f)
@@ -120,7 +158,8 @@ class MainActivity3 : ComponentActivity() {
     @Composable
     fun sliderSection(title: String,
                       color: Color,
-                      value: Float
+                      value: Float,
+                      onValueChange: (Float) -> Unit
     ) {
         Row(
             verticalAlignment = Alignment.CenterVertically
@@ -131,16 +170,17 @@ class MainActivity3 : ComponentActivity() {
             )
             Slider(
                 value = value,
-                onValueChange = {},
+                onValueChange = onValueChange,
                 valueRange = 0f..255f,
                 colors = SliderDefaults.colors(
                     thumbColor = color,
                     activeTickColor = color,
-                    inactiveTickColor = Color.Gray
+                    inactiveTrackColor = Color.Gray,
+                    activeTrackColor = color
                 ),
                 modifier = Modifier.weight(3f)
             )
-            Text(text = value.toString(),
+            Text(text = value.toInt().toString(),
                 modifier = Modifier.weight(1f),
                 textAlign = TextAlign.Center
             )
